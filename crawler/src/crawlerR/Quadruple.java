@@ -22,18 +22,18 @@ public class Quadruple {
 	
 	public String print(){
 		String all = "";
-		all += "<" + subject + "> ";
-		all += "<" + predicate + "> ";
-		all += "<" + object + ">\n";
+		all += subject + " ";
+		all += predicate + " ";
+		all += object + "\n";
 		return all;
 	}
 	
 	public String printAll(){
 		String all = "";
-		all += "<" + subject + "> ";
-		all += "<" + predicate + "> ";
-		all += "<" + object + ">\nsource: ";
-		all += "<" + source + ">, meta: ";
+		all += subject + " ";
+		all += predicate + " ";
+		all += object + "\nsource: ";
+		all += source + ", meta: ";
 		all += meta + "\n";
 		return all;
 	}

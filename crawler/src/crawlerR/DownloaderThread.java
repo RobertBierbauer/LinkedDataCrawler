@@ -41,9 +41,11 @@ public class DownloaderThread implements Runnable{
 		for (int i = 0; i < nxx.size(); i++) {
 			storage.addQuad(nxx.get(i)[0].toN3(), nxx.get(i)[1].toN3(), nxx.get(i)[2].toN3(), "<" + uri + ">", "");
 			if(nxx.get(i)[1].toN3().indexOf("seeAlso") != -1){
-				seeAlsoList.add(nxx.get(i)[2].toN3().substring(1, nxx.get(i)[2].toN3().indexOf(">")));
+				String seeAlsoURI = nxx.get(i)[2].toN3().substring(1, nxx.get(i)[2].toN3().indexOf(">"));
+				seeAlsoList.add(seeAlsoURI);
 			}
 		}
+		//storage.printAllQuads();
 		if(!seeAlsoList.isEmpty()){
 			queue.newURIs(seeAlsoList);
 		}

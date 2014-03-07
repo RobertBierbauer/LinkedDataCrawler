@@ -1,4 +1,5 @@
 package crawlerR;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -6,19 +7,66 @@ import java.util.List;
 public class URIQueue {
 	private LinkedList<String> visitedList;
 	private LinkedList<String> notVisitedList;
+	private Scheduler scheduler;
+	private int counterForThreads = 0;
 	
 	public URIQueue(){
 		visitedList = new LinkedList<String>();
 		notVisitedList = new LinkedList<String>();
 	}
 	
-	public void newURIs(LinkedList<String> newURIsList){
+	public void setScheduler(Scheduler _scheduler){
+		scheduler = _scheduler;
+	}
+	
+	public void setCounterForThreads(int _counterForThreads){
+		counterForThreads = _counterForThreads;
+		notVisitedList.clear();
+	}
+	
+	public synchronized void newURIs(LinkedList<String> newURIsList){
+		counterForThreads--;
 		for(String uri : newURIsList){
 			if(!wasVisited(uri)){
-				notVisitedList.add(uri);
+				for(String s : notVisitedList){
+					System.out.println(s);
+				}
+				System.out.println("\nInserting: " + uri + "\n");
+				//if the uri was not visited yet it is inserted into the notVisitedList in an ascending order
+				if(notVisitedList.size() == 0){
+					notVisitedList.add(uri);
+				}
+				else{
+					int first = 0;
+					int last = notVisitedList.size() -1;
+					int center = (int) Math.floor(last/2.0);
+					while(first != last){
+						if(notVisitedList.get(center).compareTo(uri) < 0){
+							first = center+1;
+							int tmp = last - first;
+							center = (int) Math.floor(tmp/2.0);
+							center += first;
+						}
+						else{
+							last = center;
+							center = (int) Math.floor(last/2.0);
+						}
+					}
+					if(first == last){
+						if(notVisitedList.get(first).compareTo(uri) < 0){
+							notVisitedList.add(first+1, uri);						
+						}
+						else{
+							notVisitedList.add(first, uri);
+						}
+					}
+				}
 			}
 		}
-		sendToScheduler(notVisitedList);
+		//if all threads crawler their domain
+		if(counterForThreads == 0){			
+			sendToScheduler();
+		}
 	}
 	
 	private boolean wasVisited(String URI){
@@ -52,8 +100,9 @@ public class URIQueue {
 		return false;
 	}
 	
-	private void sendToScheduler(LinkedList<String> notVisitedList){
-		//TODO send to scheduler
+	private void sendToScheduler(){
+		System.out.println("queue sends list");
+		scheduler.setNewURIs(notVisitedList);
 		/*
 		 * insert all URIs from the not visited list into the visited list by binary search
 		 * and remove all URIs from the not visited list
@@ -101,6 +150,5 @@ public class URIQueue {
 				}
 			}
 		}
-		notVisitedList.clear();
 	}
 }
